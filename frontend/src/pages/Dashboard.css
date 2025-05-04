@@ -1,0 +1,12 @@
+/* Dashboard.css */
+.dashboard {
+  padding: 20px;
+}
+
+.summary-item {
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 2.5rem;
+}

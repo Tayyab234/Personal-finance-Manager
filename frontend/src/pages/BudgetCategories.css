@@ -1,0 +1,17 @@
+/* BudgetCategories.css */
+.budget-categories {
+  padding: 20px;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.category {
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 10px;
+  flex: 1;
+  min-width: 200px;
+}

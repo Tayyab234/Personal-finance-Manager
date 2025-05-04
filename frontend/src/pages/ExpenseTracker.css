@@ -1,0 +1,18 @@
+/* ExpenseTracker.css */
+.expense-tracker {
+  padding: 20px;
+}
+
+.expense-input {
+  margin-bottom: 20px;
+}
+
+.expense-list ul {
+  list-style-type: none;
+}
+
+.expense-list li {
+  padding: 10px;
+  background-color: #f1f1f1;
+  margin-bottom: 5px;
+}

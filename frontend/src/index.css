@@ -1,0 +1,82 @@
+/* Base Styles */
+:root {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;  /* Allows the page to adjust to both light and dark modes */
+  color: rgba(0, 0, 0, 0.87);  /* Default text color */
+  background-color: #f4f4f4;  /* Light mode background */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;  /* Improves text legibility */
+  -webkit-font-smoothing: antialiased;  /* Smoother fonts in Webkit browsers */
+  -moz-osx-font-smoothing: grayscale;  /* Smoother fonts on macOS */
+}
+
+/* Link Styles */
+a {
+  font-weight: 500;
+  color: #2c3e50;  /* Default link color */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #3498db;  /* Hover effect for links */
+}
+
+/* Body Styles */
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;  /* Center the content horizontally */
+  align-items: center;  /* Center the content vertically */
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #ecf0f1;  /* Light mode background */
+}
+
+/* Header Styles */
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  color: #2c3e50;  /* Default header text color */
+}
+
+/* Button Styles */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.8em 1.5em;
+  font-size: 1.2em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #2980b9;  /* Default button background color */
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.25s, border-color 0.25s;  /* Smooth transition on hover */
+}
+
+button:hover {
+  background-color: #3498db;  /* Hover effect for button */
+  border-color: #2980b9;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;  /* Focus outline for accessibility */
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #ecf0f1;  /* Light text color for dark mode */
+    background-color: #2c3e50;  /* Dark background */
+  }
+
+  a:hover {
+    color: #3498db;  /* Link hover color remains the same in dark mode */
+  }
+
+  button {
+    background-color: #1abc9c;  /* Button background color for dark mode */
+  }
+}
