@@ -1,18 +1,60 @@
-/* ExpenseTracker.css */
-.expense-tracker {
-  padding: 20px;
+.expense-form, .search-box {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 1rem 0;
 }
 
-.expense-input {
-  margin-bottom: 20px;
+
+.expense-form input, .expense-form select {
+  padding: 6px;
 }
 
-.expense-list ul {
-  list-style-type: none;
+.expense-list {
+  list-style: none;
+  padding: 0;
+}
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.expense-table th,
+.expense-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.expense-table th {
+  background-color: #f4f4f4;
+  text-align: left;
 }
 
 .expense-list li {
+  margin-bottom: 10px;
   padding: 10px;
-  background-color: #f1f1f1;
-  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.progress-bar-container {
+  width: 100%;
+  background-color: #f3f3f3;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 20px;
+  background-color: #4caf50;
+  width: 0%;
+}
+
+.category-status-item {
+  margin-bottom: 10px;
 }

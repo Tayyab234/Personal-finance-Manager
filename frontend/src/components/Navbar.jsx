@@ -4,7 +4,13 @@ import './Navbar.css';
 function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
+  let user = null;
+
+  try {
+    user = JSON.parse(localStorage.getItem('user'));
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+  }
 
   const handleLogout = () => {
     localStorage.clear();
@@ -14,14 +20,18 @@ function Navbar() {
   return (
     <nav className="navbar">
       <h2>Finance Manager</h2>
-      {token && (
+      {token ? (
         <ul>
           <li><Link to="/dashboard">Dashboard</Link></li>
           <li><Link to="/expense-tracker">Expense Tracker</Link></li>
           <li><Link to="/budget-categories">Budget Categories</Link></li>
           <li><Link to="/financial-reports">Financial Reports</Link></li>
           <li><button onClick={handleLogout}>Logout</button></li>
-          {user && <li><span className="username">Hi, {user.fullName}</span></li>}
+        </ul>
+      ) : (
+        <ul>
+          <li><Link to="/login">Login</Link></li>
+          <li><Link to="/signup">Signup</Link></li>
         </ul>
       )}
     </nav>

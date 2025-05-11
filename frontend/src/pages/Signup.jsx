@@ -25,6 +25,7 @@ const Signup = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/signup', formData);
       localStorage.setItem('token', response.data.token); // Store JWT token
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/dashboard'); // Redirect to dashboard
     } catch (err) {
       setError(err.response?.data?.msg || 'Signup failed');  // Safeguard in case msg is missing

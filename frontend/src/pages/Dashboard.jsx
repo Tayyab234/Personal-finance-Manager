@@ -1,48 +1,63 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import SummaryCards from '../components/SummaryCards';
+import AddIncome from '../components/AddIncome';
 
-const Dashboard = () => {
-  const [transactions, setTransactions] = useState([]);
-  const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+// Safely parse user from localStorage
+let user = null;
+try {
+  const storedUser = localStorage.getItem('user');
+  user = storedUser && storedUser !== 'undefined' ? JSON.parse(storedUser) : null;
+} catch (e) {
+  console.error('Invalid user data in localStorage');
+  localStorage.removeItem('user');
+}
+
+
+function Dashboard() {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/dashboard', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDashboardData(response.data);
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 401) {
+        alert('Session expired. Please log in again.');
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    fetchDashboardData();
+  }, []);
 
-    const fetchTransactions = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/transactions', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setTransactions(res.data);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      }
-    };
 
-    fetchTransactions();
-  }, [token, navigate]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h2>Dashboard</h2>
-      {transactions.length === 0 ? (
-        <p>No transactions found.</p>
-      ) : (
-        <ul>
-          {transactions.map((tx) => (
-            <li key={tx._id}>{tx.title} - ${tx.amount} ({tx.type})</li>
-          ))}
-        </ul>
-      )}
+    <div className="dashboard">
+      <h2>👋 Hello, {user?.fullName || 'Guest'}</h2>
+      <p>📧 {user?.email || 'N/A'}</p>
+
+      <AddIncome onIncomeAdded={fetchDashboardData} />
+
+      <SummaryCards data={dashboardData} />
     </div>
   );
-};
+}
 
 export default Dashboard;

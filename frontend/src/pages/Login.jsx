@@ -19,9 +19,16 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Clear any previous session data (important for logging in with a new user)
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      // Store the new user's token and data
       localStorage.setItem('token', response.data.token); // Store JWT token
+      localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user data
       navigate('/dashboard'); // Redirect to dashboard
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed');

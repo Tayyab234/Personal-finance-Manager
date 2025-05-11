@@ -7,6 +7,7 @@ import FinancialReports from './pages/FinancialReports';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import './App.css';
+import ErrorBoundary from './components/ErrorBoundary';  // Import the Error Boundary
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -29,71 +30,69 @@ const HideNavbarWrapper = ({ children }) => {
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={<Navigate to="/login" />}
-        />
-        <Route
-          path="/login"
-          element={
-            <HideNavbarWrapper>
-              <Login />
-            </HideNavbarWrapper>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <HideNavbarWrapper>
-              <Signup />
-            </HideNavbarWrapper>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route
+            path="/login"
+            element={
               <HideNavbarWrapper>
-                <Dashboard />
+                <Login />
               </HideNavbarWrapper>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/expense-tracker"
-          element={
-            <PrivateRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
               <HideNavbarWrapper>
-                <ExpenseTracker />
+                <Signup />
               </HideNavbarWrapper>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/budget-categories"
-          element={
-            <PrivateRoute>
-              <HideNavbarWrapper>
-                <BudgetCategories />
-              </HideNavbarWrapper>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/financial-reports"
-          element={
-            <PrivateRoute>
-              <HideNavbarWrapper>
-                <FinancialReports />
-              </HideNavbarWrapper>
-            </PrivateRoute>
-          }
-        />
-      </Routes>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <HideNavbarWrapper>
+                  <Dashboard />
+                </HideNavbarWrapper>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/expense-tracker"
+            element={
+              <PrivateRoute>
+                <HideNavbarWrapper>
+                  <ExpenseTracker />
+                </HideNavbarWrapper>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/budget-categories"
+            element={
+              <PrivateRoute>
+                <HideNavbarWrapper>
+                  <BudgetCategories />
+                </HideNavbarWrapper>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/financial-reports"
+            element={
+              <PrivateRoute>
+                <HideNavbarWrapper>
+                  <FinancialReports />
+                </HideNavbarWrapper>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </ErrorBoundary>
     </Router>
   );
 }
-
 
 export default App;
