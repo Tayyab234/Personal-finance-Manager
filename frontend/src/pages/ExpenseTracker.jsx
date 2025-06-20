@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ExpenseTracker.css';
+import {
+  TextField, Button, Select, MenuItem, InputLabel, FormControl, Grid,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography
+} from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function ExpenseTracker() {
   const [categories, setCategories] = useState([]);
@@ -13,6 +18,11 @@ function ExpenseTracker() {
 
   const token = localStorage.getItem('token');
 
+  useEffect(() => {
+    fetchCategories();
+    fetchExpenses();
+  }, [filterDate]);
+
   const fetchCategories = async () => {
     try {
       const res = await axios.get('/api/budget-categories', {
@@ -21,7 +31,7 @@ function ExpenseTracker() {
       const categoryArray = Array.isArray(res.data.categories) ? res.data.categories : [];
       setCategories(categoryArray);
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
+      toast.error('Failed to fetch categories.');
     }
   };
 
@@ -33,47 +43,38 @@ function ExpenseTracker() {
       });
       setExpenses(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error('Failed to fetch expenses:', err);
+      toast.error('Failed to fetch expenses.');
     }
   };
-
-  useEffect(() => {
-    fetchCategories();
-    fetchExpenses();
-  }, [filterDate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (Number(amount) <= 0) {
-      alert('Amount must be greater than zero');
+      toast.warn('Amount must be greater than zero.');
       return;
     }
 
     try {
-      await axios.post(
-        '/api/expenses',
-        {
-          category: categoryId,
-          amount: Number(amount),  // ✅ convert to number
-          description
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await axios.post('/api/expenses', {
+        category: categoryId,
+        amount: Number(amount),
+        description
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
+      toast.success('Expense added successfully!');
       setAmount('');
       setDescription('');
       setCategoryId('');
       fetchExpenses();
     } catch (err) {
-      console.error(err);
-      alert('Failed to add expense');
+      toast.error('Failed to add expense.');
     }
   };
 
   const filteredExpenses = expenses.filter((exp) => {
-    const catName = exp.category?.name || '';
+    const catName = typeof exp.category === 'string'
+      ? exp.category
+      : exp.category?.name || exp.categoryName || '';
     return (
       catName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exp.amount.toString().includes(searchTerm)
@@ -83,91 +84,126 @@ function ExpenseTracker() {
   const formatDate = (date) => {
     if (!date) return 'No Date';
     const d = new Date(date);
-
-    const datePart = d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    const timePart = d.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    return `${datePart}, ${timePart}`;
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   return (
-    <div className="expense-tracker">
-      <h2>Track Expenses</h2>
+    <div style={{ padding: '20px' }}>
+      <ToastContainer />
+      <Typography variant="h4" gutterBottom>Expense Tracker</Typography>
 
-      <form onSubmit={handleSubmit} className="expense-form">
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-          required
-        >
-          <option value="">-- Select Category --</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-        <button type="submit">Add Expense</button>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth>
+              <InputLabel>Select Category</InputLabel>
+              <Select
+                value={categoryId}
+                label="Select Category"
+                onChange={(e) => setCategoryId(e.target.value)}
+                required
+              >
+                {categories.map((cat) => (
+                  <MenuItem key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Amount"
+              type="number"
+              fullWidth
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Description"
+              fullWidth
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={2}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              style={{ height: '100%' }}
+            >
+              Add
+            </Button>
+          </Grid>
+        </Grid>
       </form>
 
-      <div className="filters">
-        <input
-          type="text"
-          className="search-box"
-          placeholder="Search by category or amount"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <input
-          type="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-        />
-      </div>
+      <Grid container spacing={2} style={{ marginTop: '20px' }}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Search by Category or Amount"
+            variant="outlined"
+            fullWidth
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Grid>
 
-      <table className="expense-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Description</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-  {filteredExpenses.map((exp) => (
-    <tr key={exp._id}>
-      <td>{exp.category?.name || exp.categoryName || 'Unknown'}</td> {/* Update this line */}
-      <td>${Number(exp.amount).toFixed(2)}</td>
-      <td>{exp.description}</td>
-      <td>{formatDate(exp.createdAt)}</td>
-    </tr>
-  ))}
-</tbody>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Filter by Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+          />
+        </Grid>
+      </Grid>
 
-      </table>
+      <TableContainer component={Paper} style={{ marginTop: '30px' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
+   	      <TableCell sx={{ fontWeight: 'bold' }}>Amount</TableCell>
+    	      <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+    	      <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredExpenses.length > 0 ? (
+              filteredExpenses.map((exp) => (
+                <TableRow key={exp._id}>
+                  <TableCell>
+                    {typeof exp.category === 'string'
+                      ? exp.category
+                      : exp.category?.name || exp.categoryName || 'Unknown'}
+                  </TableCell>
+                  <TableCell>${Number(exp.amount).toFixed(2)}</TableCell>
+                  <TableCell>{exp.description}</TableCell>
+                  <TableCell>{formatDate(exp.createdAt || exp.date)}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center" style={{ color: 'gray' }}>
+                  No expenses found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }

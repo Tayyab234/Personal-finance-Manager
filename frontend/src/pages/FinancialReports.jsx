@@ -1,15 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable'; // This registers autoTable onto jsPDF
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import FinancialReportPDF from './FinancialReportPDF';
+
+import {
+  Container,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  TextField,
+  Button,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box
+} from '@mui/material';
+import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
+
 dayjs.extend(utc);
 
 function FinancialReports() {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dateRange, setDateRange] = useState('last30');
+  const [dateRange, setDateRange] = useState('today');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   const [error, setError] = useState(null);
@@ -21,6 +43,10 @@ function FinancialReports() {
     let start, end;
 
     switch (dateRange) {
+      case 'today':
+        start = today.startOf('day');
+        end = today.endOf('day');
+        break;
       case 'last30':
         start = today.subtract(30, 'day').startOf('day');
         end = today.endOf('day');
@@ -45,10 +71,10 @@ function FinancialReports() {
   };
 
   const fetchReport = async () => {
-    const { startDate, endDate } = getDateRange();  
-    if (!startDate || !endDate) return;  
+    const { startDate, endDate } = getDateRange();
+    if (!startDate || !endDate) return;
 
-    setLoading(true);  
+    setLoading(true);
     setError(null);
 
     try {
@@ -57,12 +83,12 @@ function FinancialReports() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setLoading(false);
       setReportData(response.data.reports || []);
     } catch (err) {
-      setLoading(false);
       setError('Error fetching report. Please try again later.');
       console.error('Error fetching report:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,112 +96,120 @@ function FinancialReports() {
     fetchReport();
   }, [dateRange, customStart, customEnd]);
 
-  const handleGeneratePDF = () => {
-    const doc = new jsPDF();
-    doc.text('Financial Report by Category', 14, 15);
-
-    const tableBody = reportData.flatMap((item, index) => {
-      const categoryName = item._id?.category || 'Deleted Category';
-      return item.transactions.map((tx) => [
-        index + 1,
-        categoryName,
-        `$${tx.amount.toFixed(2)}`,
-        tx.description,
-        new Date(tx.date).toLocaleDateString(),
-      ]);
-    });
-
-    doc.autoTable({
-      head: [['#', 'Category', 'Amount', 'Description', 'Date']],
-      body: tableBody,
-      startY: 25,
-      margin: { left: 14 },
-      theme: 'striped',
-    });
-
-    doc.save('financial_report.pdf');
-  };
-
   return (
-    <div className="financial-report">
-      <h2>Financial Reports</h2>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom align="center">
+        📊 Financial Reports
+      </Typography>
 
-      <div>
-        <label htmlFor="dateRangeSelect">Select Date Range: </label>
-        <select
-          id="dateRangeSelect"
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value)}
-        >
-          <option value="last30">Last 30 Days</option>
-          <option value="prevMonth">Previous Month</option>
-          <option value="thisYear">This Year</option>
-          <option value="custom">Custom Range</option>
-        </select>
-      </div>
+      <Box display="flex" justifyContent="center" alignItems="center" gap={2} mb={3}>
+        <FormControl fullWidth>
+          <InputLabel id="date-range-label">Select Date Range</InputLabel>
+          <Select
+            labelId="date-range-label"
+            value={dateRange}
+            label="Select Date Range"
+            onChange={(e) => setDateRange(e.target.value)}
+          >
+            <MenuItem value="today">None (Today)</MenuItem>
+            <MenuItem value="last30">Last 30 Days</MenuItem>
+            <MenuItem value="prevMonth">Previous Month</MenuItem>
+            <MenuItem value="thisYear">This Year</MenuItem>
+            <MenuItem value="custom">Custom Range</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
       {dateRange === 'custom' && (
-        <div style={{ marginTop: '1rem' }}>
-          <label htmlFor="customStart">Start Date: </label>
-          <input
-            id="customStart"
+        <Box display="flex" justifyContent="center" alignItems="center" gap={2} mb={3}>
+          <TextField
+            label="Start Date"
             type="date"
+            InputLabelProps={{ shrink: true }}
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
+            fullWidth
           />
-          <label htmlFor="customEnd" style={{ marginLeft: '1rem' }}>End Date: </label>
-          <input
-            id="customEnd"
+          <TextField
+            label="End Date"
             type="date"
+            InputLabelProps={{ shrink: true }}
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
+            fullWidth
           />
-        </div>
+        </Box>
       )}
 
       {loading ? (
-        <p>Loading report...</p>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
       ) : error ? (
-        <p style={{ color: 'red' }}>{error}</p>
+        <Typography color="error" align="center" mt={4}>{error}</Typography>
       ) : reportData.length ? (
         <>
-          <table style={{ width: '100%', marginTop: '1rem', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Category</th>
-                <th>Total Spent</th>
-                <th>Transactions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((item, i) => (
-                <tr key={i}>
-                  <td>{i + 1}</td>
-                  <td>{item._id?.category || 'Deleted Category'}</td>
-                  <td>${item.totalSpent.toFixed(2)}</td>
-                  <td>
-                    <ul>
-                      {item.transactions.map((tx, idx) => (
-                        <li key={idx}>
-                          ${tx.amount.toFixed(2)} - {tx.description} ({new Date(tx.date).toLocaleDateString()})
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <TableContainer component={Paper} sx={{ mt: 3 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Total Spent</TableCell>
+                  <TableCell>Transactions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {reportData.map((item, i) => (
+                  <TableRow key={i}>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>{item._id || 'Deleted Category'}</TableCell>
+                    <TableCell>${item.totalSpent.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <ul style={{ paddingLeft: '1rem', margin: 0 }}>
+                        {item.transactions.map((tx, idx) => (
+                          <li key={idx}>
+                            ${tx.amount.toFixed(2)} - {tx.description} ({new Date(tx.date).toLocaleDateString()})
+                          </li>
+                        ))}
+                      </ul>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          <button onClick={handleGeneratePDF} style={{ marginTop: '1rem' }}>
-            Generate PDF Report
-          </button>
+          {/* PDF Download Button */}
+          <Box display="flex" justifyContent="center" mt={3}>
+            <PDFDownloadLink
+              document={<FinancialReportPDF reportData={reportData} />}
+              fileName="financial_report.pdf"
+              style={{ textDecoration: 'none' }}
+            >
+              {({ loading }) =>
+                loading ? (
+                  <Button variant="contained" disabled>
+                    Preparing PDF...
+                  </Button>
+                ) : (
+                  <Button variant="contained">
+                    Download PDF Report
+                  </Button>
+                )
+              }
+            </PDFDownloadLink>
+          </Box>
         </>
       ) : (
-        <p>No transactions found for the selected date range.</p>
+        <Box display="flex" flexDirection="column" alignItems="center" mt={6}>
+          <ReportProblemOutlinedIcon sx={{ fontSize: 80, color: 'grey.500' }} />
+          <Typography variant="h6" color="textSecondary" mt={2}>
+            No transactions found for the selected date range.
+          </Typography>
+        </Box>
       )}
-    </div>
+    </Container>
   );
 }
 

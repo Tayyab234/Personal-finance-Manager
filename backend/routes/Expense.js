@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticateUser } = require('../middleware/authMiddleware');
 const Expense = require('../models/Expense');
 const BudgetCategory = require('../models/BudgetCategory');
+const Data = require('../models/data');
 const mongoose = require('mongoose');
 
 // POST /api/expenses - Add an expense
@@ -57,6 +58,17 @@ router.post('/', authenticateUser, async (req, res) => {
     });
 
     await expense.save();
+
+   // Store data for reports 
+const newData = new Data({
+  user: req.user.id,
+  categoryName: budgetCategory.name,
+  amount,
+  description,
+  date: date || new Date(),
+});
+
+await newData.save();
 
     await BudgetCategory.findOneAndUpdate(
       { _id: category, user: req.user.id },

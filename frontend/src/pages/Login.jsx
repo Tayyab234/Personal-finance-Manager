@@ -1,72 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, Paper, Typography, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';  // Use useNavigate
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState('');
-  const navigate = useNavigate();  // Changed to useNavigate
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Clear local storage and form when page loads
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setFormData({ email: '', password: '' });
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Clear any previous session data (important for logging in with a new user)
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-      // Store the new user's token and data
-      localStorage.setItem('token', response.data.token); // Store JWT token
-      localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user data
-      navigate('/dashboard'); // Redirect to dashboard
+      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      toast.success('Login successful!', { autoClose: 1500 });
+      setTimeout(() => navigate('/dashboard'), 1600);
+      setFormData({ email: '', password: '' });
     } catch (err) {
-      setError(err.response?.data?.msg || 'Login failed');
+      toast.error(err.response?.data?.msg || 'Login failed');
     }
   };
 
-  // Navigate to signup page when "Create Account" is clicked
-  const handleCreateAccount = () => {
-    navigate('/signup'); // Redirect to signup page
-  };
-
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      {error && <p className="error-message">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Email"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Password"
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
-      <div className="signup-prompt">
-        <p>Don't have an account? <button onClick={handleCreateAccount}>Create Account</button></p>
-      </div>
-    </div>
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <ToastContainer />
+      <Paper elevation={4} style={{ padding: 30, width: 400 }}>
+        <Typography variant="h4" gutterBottom align="center">Login</Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: 20 }}>
+            Login
+          </Button>
+        </form>
+        <Typography align="center" style={{ marginTop: 15 }}>
+          Don't have an account?{' '}
+          <Button onClick={() => navigate('/signup')} size="small">Create Account</Button>
+        </Typography>
+      </Paper>
+    </Box>
   );
 };
 

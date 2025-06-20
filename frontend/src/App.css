@@ -1,4 +1,24 @@
 /* General Styles */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block !important;
+  }
+
+  .desktop-menu {
+    display: none !important;
+  }
+}
+
+a:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
 * {
   margin: 0;
   padding: 0;

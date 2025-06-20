@@ -38,6 +38,9 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/income', require('./routes/income')); // ✅ Income route registered
 app.use('/api/budget-categories', budgetCategoryRoutes);
 app.use('/api/Expenses', require('./routes/Expense'));
+app.use('/api/resetdata', require('./routes/resetdata'));
+
+app.use('/api/dashboard', require('./routes/dashboard'));
 // 404 Handler for undefined routes
 app.use((req, res, next) => {
   res.status(404).json({ msg: 'API route not found' });

@@ -1,39 +1,92 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
-  let user = null;
-
-  try {
-    user = JSON.parse(localStorage.getItem('user'));
-  } catch (error) {
-    console.error('Error parsing user data:', error);
-  }
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
   };
+
+  const navLinks = [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/expense-tracker', label: 'Expense Tracker' },
+    { to: '/budget-categories', label: 'Budget Categories' },
+    { to: '/financial-reports', label: 'Financial Reports' },
+  ];
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <nav className="navbar">
-      <h2>Finance Manager</h2>
-      {token ? (
-        <ul>
-          <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><Link to="/expense-tracker">Expense Tracker</Link></li>
-          <li><Link to="/budget-categories">Budget Categories</Link></li>
-          <li><Link to="/financial-reports">Financial Reports</Link></li>
-          <li><button onClick={handleLogout}>Logout</button></li>
-        </ul>
-      ) : (
-        <ul>
-          <li><Link to="/login">Login</Link></li>
-          <li><Link to="/signup">Signup</Link></li>
-        </ul>
-      )}
+      {/* Top Row */}
+      <div className="navbar-top" onClick={() => navigate('/')}>
+        Finance Manager
+      </div>
+
+      {/* Menu Toggle (Mobile) */}
+      <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+        {menuOpen ? <X size={28} /> : <Menu size={28} />}
+      </div>
+
+      {/* Navigation Links */}
+      <ul className={`nav-links ${menuOpen ? 'active' : ''}`}>
+        {token ? (
+          <>
+            {navLinks.map((link, index) => (
+              <li key={index}>
+                <Link
+                  to={link.to}
+                  className={isActive(link.to) ? 'active-link' : ''}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link
+                to="/"
+                className="logout-link"
+                onClick={() => {
+                  handleLogout();
+                  setMenuOpen(false);
+                }}
+              >
+                Logout
+              </Link>
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <Link
+                to="/login"
+                className={isActive('/login') ? 'active-link' : ''}
+                onClick={() => setMenuOpen(false)}
+              >
+                Login
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/signup"
+                className={isActive('/signup') ? 'active-link' : ''}
+                onClick={() => setMenuOpen(false)}
+              >
+                Signup
+              </Link>
+            </li>
+          </>
+        )}
+      </ul>
     </nav>
   );
 }
