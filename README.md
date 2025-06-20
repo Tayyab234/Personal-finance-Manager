@@ -1,8 +1,11 @@
 Personal Finance Manager (Budget Tracker)
-📌 Project Overview
+
+📌 Project Overview 
+
 The Personal Finance Manager is a MERN stack web application designed to help users efficiently track their income, expenses, savings, and budgeting habits. It empowers users to categorize spending, set budget limits, analyze financial trends through dynamic charts, and generate meaningful insights for smarter financial planning. Collaboration features enable sharing budgets with family or roommates for joint management.
 
 🌟 Key Features
+
 🔐 User Authentication: Secure login and registration using JWT.
 
 📊 Dashboard Overview: Real-time summary of total income, expenses, and savings.
@@ -13,11 +16,11 @@ The Personal Finance Manager is a MERN stack web application designed to help us
 
 📈 Dashboard Analytics:
 
-Dynamic charts (Line, Pie, Bar, Donut) using Recharts.
-
-Analyze spending by category and track savings/expenses over time.
-
-Filter analytics by custom date range, this year, last 30 days, or previous month.
+    1. Dynamic charts (Line, Pie, Bar, Donut) using Recharts.
+    
+    2. Analyze spending by category and track savings/expenses over time.
+    
+    3. Filter analytics by custom date range, this year, last 30 days, or previous month.
 
 📑 Financial Reports (PDF Export): Download monthly or yearly financial summaries in PDF format.
 
@@ -35,26 +38,39 @@ Filter analytics by custom date range, this year, last 30 days, or previous mont
 Frontend:
 
   1.React.js
+  
   2.Axios
+  
   3.Material-UI (MUI)
+  
   4.Recharts (Charts and Visualizations)
+  
   5.React Toastify (Notifications)
+  
   6.jsPDF (PDF Export)
 
 Backend:
 
   1.Node.js
+  
   2.Express.js
+  
   3.MongoDB
+  
   4.Mongoose
+  
   5.JWT (Authentication)
+  
   6.Bcrypt (Password Hashing)
 
 Version Control:
+
   . Git & GitHub
 
 Deployment:
+
   . Netlify / Vercel (Frontend)
+  
   . Render / Railway (Backend)
 
 🚀 Future Improvements
